@@ -6,16 +6,16 @@ import Effect (Effect)
 import Effect.Aff (launchAff_)
 import Test.Spec.Reporter (consoleReporter)
 import Test.Spec.Runner (runSpec)
-import Test.ULC (testFv, testFreshVar, testAlphaConversion, testSbst, testBetaReduction, testIsPrenexNF, testCallByValue)
+import Test.ULC (testFv, testFetchFreshVar, testAlphaConversion, testSbst, testBetaReduction, testCallByValue, testCallByValueTrampoline)
 
 main :: Effect Unit
 main = do
   launchAff_ $ runSpec [ consoleReporter ]
     $ do
         testFv
-        testFreshVar
+        testFetchFreshVar
         testAlphaConversion
         testSbst
         testBetaReduction
-        testIsPrenexNF
         testCallByValue
+        testCallByValueTrampoline

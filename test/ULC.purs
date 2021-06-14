@@ -6,7 +6,7 @@ import Data.List (List(..))
 import Data.List as List
 import Test.Spec (Spec, describe, it)
 import Test.Spec.Assertions (shouldEqual)
-import ULC (Term(..), alphaConversion, betaReduction, callByValue, freshVar, fv, isPrenexNF, sbst)
+import ULC (Term(..), alphaConversion, betaReduction, callByValue, callByValueTrampoline, fetchFreshVar, fv, sbst)
 
 testFv :: Spec Unit
 testFv =
@@ -22,16 +22,16 @@ testFv =
     it (show (List.toUnfoldable result :: Array String) <> " ∈ FV(" <> (show tm) <> ")") do
       fv tm `shouldEqual` result
 
-testFreshVar :: Spec Unit
-testFreshVar =
+testFetchFreshVar :: Spec Unit
+testFetchFreshVar =
   describe "ULC" do
-    describe "freshVar" do
+    describe "fetchFreshVar" do
       testValid (App (Var "x") (Var "y")) "x" "x0"
       testValid (App (Var "x") (Var "x0")) "x" "x1"
   where
   testValid tm id result =
     it (id <> " ∈ FV(" <> show tm <> ") but " <> result <> " ∉ FV(" <> show tm <> ")") do
-      freshVar tm id `shouldEqual` result
+      fetchFreshVar tm id `shouldEqual` result
 
 testAlphaConversion :: Spec Unit
 testAlphaConversion =
@@ -82,25 +82,6 @@ testBetaReduction =
     it (show tm <> " → " <> show result) do
       betaReduction tm `shouldEqual` result
 
-testIsPrenexNF :: Spec Unit
-testIsPrenexNF =
-  describe "ULC" do
-    describe "isPrenexNF" do
-      testValid (Var "x")
-      testValid (Abst "x" (Var "x"))
-      testValid (Abst "x" (App (Var "x") (Var "y")))
-      testValid (Abst "x" (App (Abst "x" (Var "x")) (Var "y")))
-      testValid (App (Var "x") (Var "y"))
-      testInvalid (App (Abst "x" (Var "x")) (Var "y"))
-  where
-  testValid tm =
-    it (show tm <> " is prenex normal form") do
-      isPrenexNF tm `shouldEqual` true
-
-  testInvalid tm =
-    it (show tm <> " is not prenex normal form") do
-      isPrenexNF tm `shouldEqual` false
-
 testCallByValue :: Spec Unit
 testCallByValue =
   describe "ULC" do
@@ -111,3 +92,14 @@ testCallByValue =
   testValid tm result =
     it (show tm <> " →* " <> show result) do
       callByValue tm `shouldEqual` result
+
+testCallByValueTrampoline :: Spec Unit
+testCallByValueTrampoline =
+  describe "ULC" do
+    describe "callByValue" do
+      testValid (App (Abst "x" (Var "x")) (App (Abst "y" (Var "y")) (Var "x"))) (Var "x")
+      testValid (App (Var "x") (App (Abst "x" (Var "x")) (Var "y"))) (App (Var "x") (App (Abst "x" (Var "x")) (Var "y")))
+  where
+  testValid tm result =
+    it (show tm <> " →* " <> show result) do
+      callByValueTrampoline tm `shouldEqual` result
