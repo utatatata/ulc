@@ -6,7 +6,7 @@ import Data.List (List(..))
 import Data.List as List
 import Test.Spec (Spec, describe, it)
 import Test.Spec.Assertions (shouldEqual)
-import ULC (Term(..), alphaConversion, betaReduction, callByValue, callByValueTrampoline, fetchFreshVar, fv, sbst)
+import ULC (Term(..), alphaConversion, betaReduction, callByValue, callByValueCPS, callByValueTrampoline, fetchFreshVar, fv, sbst)
 
 testFv :: Spec Unit
 testFv =
@@ -93,10 +93,21 @@ testCallByValue =
     it (show tm <> " →* " <> show result) do
       callByValue tm `shouldEqual` result
 
+testCallByValueCPS :: Spec Unit
+testCallByValueCPS =
+  describe "ULC" do
+    describe "callByValueCPS" do
+      testValid (App (Abst "x" (Var "x")) (App (Abst "y" (Var "y")) (Var "x"))) (Var "x")
+      testValid (App (Var "x") (App (Abst "x" (Var "x")) (Var "y"))) (App (Var "x") (App (Abst "x" (Var "x")) (Var "y")))
+  where
+  testValid tm result =
+    it (show tm <> " →* " <> show result) do
+      callByValueCPS tm `shouldEqual` result
+
 testCallByValueTrampoline :: Spec Unit
 testCallByValueTrampoline =
   describe "ULC" do
-    describe "callByValue" do
+    describe "callByValueTrampoline" do
       testValid (App (Abst "x" (Var "x")) (App (Abst "y" (Var "y")) (Var "x"))) (Var "x")
       testValid (App (Var "x") (App (Abst "x" (Var "x")) (Var "y"))) (App (Var "x") (App (Abst "x" (Var "x")) (Var "y")))
   where
