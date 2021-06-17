@@ -6,6 +6,7 @@ import Control.Monad.Trampoline (Trampoline, done, delay, runTrampoline)
 import Data.List (List)
 import Data.List as List
 
+
 -- x     ... variable
 -- λx.M ... lambda abstraction
 -- xy    ... application
@@ -89,27 +90,6 @@ callByValue tm@(App m1@(Abst _ _) m2) =
   isValue (App _ _) = false
   isValue _ = true
 callByValue tm = tm
-
--- implementation using CPS for tail call
-callByValueCPS :: Term -> Term
-callByValueCPS term =
-  recur term unit
-  where
-  -- CPS
-  recur tm@(App m1@(Abst _ _) m2) =
-    \_ ->
-      let m2' = recur m2 unit in
-      if isValue m2' then
-        let tm' = betaReduction (App m1 m2') in
-          if tm' == App m1 m2' then
-            tm'
-          else
-            recur tm' unit
-      else
-        tm
-  recur tm = const tm
-  isValue (App _ _) = false
-  isValue tm = true
 
 -- implementation using Trampoline
 -- https://pursuit.purescript.org/packages/purescript-free/6.0.1/docs/Control.Monad.Trampoline
