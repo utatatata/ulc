@@ -66,7 +66,7 @@ sbst (Abst bv body) id repl =
     sbst (alphaConversion (Abst bv body) newBv) id repl
 
 -- e.g.
--- x ▷ x
+-- x  x
 -- λx.y ▷ λx.y
 -- xy ▷ xy
 -- ((λx.xy) zz) ▷ zzy
@@ -74,7 +74,10 @@ betaReduction :: Term -> Term
 betaReduction (App (Abst bv body) m2) = sbst body bv m2
 betaReduction tm = tm
 
--- only the outermost redex
+-- e.g.
+-- (λx.x) y ▷ y
+-- (λx.x) ((λy.y) z) ▷ z
+-- ((λx.x) (λy.y)) z ▷ ((λx.x) (λy.y)) z
 callByValue :: Term -> Term
 callByValue tm@(App m1@(Abst _ _) m2) =
   let m2' = callByValue m2 in

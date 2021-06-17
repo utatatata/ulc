@@ -87,19 +87,26 @@ testCallByValue =
   describe "ULC" do
     describe "callByValue" do
       testValid (App (Abst "x" (Var "x")) (App (Abst "y" (Var "y")) (Var "x"))) (Var "x")
-      testValid (App (Var "x") (App (Abst "x" (Var "x")) (Var "y"))) (App (Var "x") (App (Abst "x" (Var "x")) (Var "y")))
+      testValidSame (App (Var "x") (App (Abst "x" (Var "x")) (Var "y")))
+      testValidSame (App (App (Abst "x" (Var "x")) (Abst "x" (Var "x"))) (Var "x"))
   where
   testValid tm result =
     it (show tm <> " →* " <> show result) do
       callByValue tm `shouldEqual` result
+  testValidSame tm =
+    testValid tm tm
+
 
 testCallByValueTrampoline :: Spec Unit
 testCallByValueTrampoline =
   describe "ULC" do
     describe "callByValueTrampoline" do
       testValid (App (Abst "x" (Var "x")) (App (Abst "y" (Var "y")) (Var "x"))) (Var "x")
-      testValid (App (Var "x") (App (Abst "x" (Var "x")) (Var "y"))) (App (Var "x") (App (Abst "x" (Var "x")) (Var "y")))
+      testValidSame (App (Var "x") (App (Abst "x" (Var "x")) (Var "y")))
+      testValidSame (App (App (Abst "x" (Var "x")) (Abst "x" (Var "x"))) (Var "x"))
   where
   testValid tm result =
     it (show tm <> " →* " <> show result) do
       callByValueTrampoline tm `shouldEqual` result
+  testValidSame tm =
+    testValid tm tm
